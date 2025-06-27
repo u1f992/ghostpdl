@@ -1,11 +1,34 @@
 {
-    "name": "@u1f992/ghostpdl",
-    "version": "0.1.0",
-    "main": "index.js",
-    "type": "module",
-    "devDependencies": {
-        "@types/node": "^24.0.4",
-        "prettier": "^3.6.2",
-        "typescript": "^5.8.3"
-    }
+  "name": "@u1f992/ghostpdl",
+  "version": "0.1.0",
+  "description": "WASM build variant of ArtifexSoftware/ghostpdl.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "clean:wasm": "docker run --interactive --mount type=bind,source=\"$(pwd)/..\",target=/workdir --rm --tty --workdir /workdir emscripten/emsdk:4.0.10 make clean && shx rm -f src/gs.js src/gs.wasm",
+    "clean:typescript": "shx rm -rf dist",
+    "clean": "npm run clean:typescript && npm run clean:wasm",
+    "build:wasm": "shx cp ../arch/windows-x86-msvc.h ../arch/wasm32-unknown-emscripten.h && docker run --entrypoint /bin/bash --interactive --mount type=bind,source=\"$(pwd)/..\",target=/workdir --rm --tty --workdir /workdir emscripten/emsdk:4.0.10 -c 'apt update && apt install --yes autoconf && NOCONFIGURE=1 ./autogen.sh && emconfigure ./configure CCAUX=gcc --with-arch_h=arch/wasm32-unknown-emscripten.h && emmake make --jobs=$(nproc) XE=\".js\" GS_LDFLAGS=\"-s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -s FORCE_FILESYSTEM=1 -s INVOKE_RUN=0 -s EXPORTED_RUNTIME_METHODS=[\\\"FS\\\",\\\"callMain\\\"]\"' && shx cp ../bin/gs.js src/gs.js && shx cp ../bin/gs.wasm src/gs.wasm && shx rm -f ../arch/wasm32-unknown-emscripten.h ../a.wasm",
+    "build:typescript": "npm run format && tsc && shx cp src/gs.wasm dist/gs.wasm",
+    "build": "npm run build:wasm && npm run build:typescript",
+    "format": "prettier --write src/index.ts src/index.test.ts package.json prettier.config.js README.md tsconfig.json",
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/u1f992/ghostpdl.git"
+  },
+  "keywords": [],
+  "author": "Koutaro Mukai",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/u1f992/ghostpdl/issues"
+  },
+  "homepage": "https://github.com/u1f992/ghostpdl",
+  "devDependencies": {
+    "@types/node": "^24.0.4",
+    "prettier": "^3.6.2",
+    "shx": "^0.4.0",
+    "typescript": "^5.8.3"
+  }
 }
