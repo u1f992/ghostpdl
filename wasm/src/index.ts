@@ -24,18 +24,27 @@ export type Options = {
   outputFilePaths: string[];
 };
 
+export type Result = {
+  exitCode: number;
+  outputStreams: {
+    src: "stdout" | "stderr";
+    charCode: number;
+  }[];
+  outputFiles: Record<string, Uint8Array<ArrayBufferLike>>;
+};
+
 export async function gs({
   args,
   stdin,
   inputFiles,
   outputFilePaths,
-}: Partial<Options>) {
+}: Partial<Options>): Promise<Result> {
   args ??= [];
   stdin ??= new Uint8Array();
   inputFiles ??= [];
   outputFilePaths ??= [];
 
-  const outputStreams: { src: "stdout" | "stderr"; charCode: number }[] = [];
+  const outputStreams: Result["outputStreams"] = [];
   let stdinOffset = 0;
 
   const module = await Module({
@@ -62,9 +71,9 @@ export async function gs({
 
   // https://github.com/emscripten-core/emscripten/pull/14865
   // @ts-ignore
-  const exitCode = module.callMain(args);
+  const exitCode: Result["exitCode"] = module.callMain(args);
 
-  const outputFiles: Record<string, Uint8Array> = {};
+  const outputFiles: Result["outputFiles"] = {};
   for (const filePath of outputFilePaths) {
     // @ts-ignore
     outputFiles[filePath] = module.FS.readFile(filePath);
