@@ -1,9 +1,19 @@
 {
   "name": "@u1f992/ghostpdl",
   "version": "0.1.0",
-  "description": "WASM build variant of ArtifexSoftware/ghostpdl.",
-  "main": "index.js",
+  "description": "WASM build variant of ArtifexSoftware/ghostpdl 10.05.1.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/gs.js",
+    "dist/gs.wasm",
+    "README.md",
+    "LICENSE",
+    "LICENSE-ghostpdl"
+  ],
   "scripts": {
     "clean:wasm": "docker run --interactive --mount type=bind,source=\"$(pwd)/..\",target=/workdir --rm --tty --workdir /workdir emscripten/emsdk:4.0.10 make clean && shx rm -f src/gs.js src/gs.wasm",
     "clean:typescript": "shx rm -rf dist",

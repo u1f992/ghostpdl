@@ -1,6 +1,6 @@
 # @u1f992/ghostpdl
 
-WASM build variant of [ArtifexSoftware/ghostpdl](https://github.com/ArtifexSoftware/ghostpdl).
+WASM build variant of [ArtifexSoftware/ghostpdl](https://github.com/ArtifexSoftware/ghostpdl/tree/ghostpdl-10.05.1) 10.05.1.
 
 This build only provides an interface to run the Ghostscript CLI, and is not a WASM build as a library (JavaScript bindings).
 
