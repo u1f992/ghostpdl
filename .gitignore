@@ -136,3 +136,9 @@ doc/.buildinfo
 # gs/*.png
 # gs/*.tif
 # gs/*.tiff
+
+node_modules
+dist
+a.wasm
+configaux.log
+arch-config
