@@ -395,7 +395,7 @@ struct gs_fapi_server_s
                                 basefont->FontType == ft_encrypted2 ||\
                                 basefont->FontType == ft_CID_encrypted)
 
-typedef int (*gs_fapi_get_server_param_callback) (gs_fapi_server *I,
+typedef void (*gs_fapi_get_server_param_callback) (gs_fapi_server *I,
                                                   const char *subtype,
                                                   char **server_param,
                                                   int *server_param_size);

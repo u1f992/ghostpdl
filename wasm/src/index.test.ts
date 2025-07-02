@@ -18,7 +18,12 @@
 import { gs } from "./index.js";
 
 import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 await test("gs --version", async () => {
   const ret = await gs({
@@ -28,4 +33,29 @@ await test("gs --version", async () => {
     new Uint8Array(ret.outputStreams.map(({ charCode }) => charCode)),
   );
   assert.strictEqual(log, "10.05.1\n");
+});
+
+await test("gs -dNOPAUSE -dBATCH -sDEVICE=ps2write -sOutputFile=manuscript.ps manuscript.pdf", async () => {
+  const ret = await gs({
+    args: [
+      "-dNOPAUSE",
+      "-dBATCH",
+      "-sDEVICE=ps2write",
+      "-sOutputFile=manuscript.ps",
+      "manuscript.pdf",
+    ],
+    inputFiles: {
+      "manuscript.pdf": fs.readFileSync(
+        path.resolve(__dirname, "../asset/manuscript.pdf"),
+      ),
+    },
+    outputFilePaths: ["manuscript.ps"],
+  });
+  assert.strictEqual(ret.exitCode, 0);
+  assert.ok("manuscript.ps" in ret.outputFiles);
+
+  fs.writeFileSync(
+    path.resolve(__dirname, "../asset/manuscript.ps"),
+    ret.outputFiles["manuscript.ps"],
+  );
 });
