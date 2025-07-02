@@ -22,3 +22,5 @@ $ npm run test
 The build scripts and glue codes I created are provided under [AGPL-3.0](./LICENSE).
 
 For the license of ArtifexSoftware/ghostpdl, please see [LICENSE-ghostpdl](./LICENSE-ghostpdl).
+
+**Do not use version 0.1.0.** It was mistakenly published under the GPL license instead of the AGPL, which constitutes a license violation.

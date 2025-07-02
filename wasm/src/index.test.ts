@@ -1,5 +1,5 @@
 /*
- * Copyright (C) <year>  Koutaro Mukai
+ * Copyright (C) 2025  Koutaro Mukai
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
