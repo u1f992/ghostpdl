@@ -20,7 +20,7 @@ import Module from "./gs.js";
 export type Options = {
   args: string[];
   stdin: Uint8Array;
-  inputFiles: { filePath: string; content: Uint8Array }[];
+  inputFiles: Record<string, Uint8Array<ArrayBufferLike>>;
   outputFilePaths: string[];
 };
 
@@ -41,7 +41,7 @@ export async function gs({
 }: Partial<Options>): Promise<Result> {
   args ??= [];
   stdin ??= new Uint8Array();
-  inputFiles ??= [];
+  inputFiles ??= {};
   outputFilePaths ??= [];
 
   const outputStreams: Result["outputStreams"] = [];
@@ -64,7 +64,7 @@ export async function gs({
     },
   });
 
-  for (const { filePath, content } of inputFiles) {
+  for (const [filePath, content] of Object.entries(inputFiles)) {
     // @ts-ignore
     module.FS.writeFile(filePath, content);
   }
