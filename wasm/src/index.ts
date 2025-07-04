@@ -19,7 +19,7 @@ import Worker from "web-worker";
 
 export type Options = {
   args: string[];
-  stdin: Uint8Array;
+  stdin: Uint8Array<ArrayBufferLike>;
   inputFiles: Record<string, Uint8Array<ArrayBufferLike>>;
   outputFilePaths: string[];
   onStdout?: (charCode: number | null) => void;
@@ -29,7 +29,7 @@ export type Options = {
 
 export type Result = {
   exitCode: number;
-  outputFiles: Record<string, Uint8Array<ArrayBufferLike>>;
+  outputFiles: Record<string, Uint8Array<ArrayBuffer>>;
 };
 
 export async function gs({

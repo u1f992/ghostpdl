@@ -16,7 +16,7 @@
  */
 
 import Module from "./gs.js";
-import type { Options } from "./index.js";
+import type { Options, Result } from "./index.js";
 
 addEventListener(
   "message",
@@ -49,13 +49,13 @@ addEventListener(
     }
 
     // @ts-ignore
-    const exitCode: number = module.callMain(args);
+    const exitCode = module.callMain(args) as number;
 
-    const outputFiles: Record<string, Uint8Array<ArrayBufferLike>> = {};
-    const transferables: ArrayBuffer[] = [];
+    const outputFiles: Result["outputFiles"] = {};
+    const transferables: Transferable[] = [];
     for (const filePath of outputFilePaths) {
       // @ts-ignore
-      const fileData = module.FS.readFile(filePath);
+      const fileData = module.FS.readFile(filePath) as Uint8Array<ArrayBuffer>;
       outputFiles[filePath] = fileData;
       transferables.push(fileData.buffer);
     }
