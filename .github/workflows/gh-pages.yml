@@ -35,8 +35,8 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies and build
-        working-directory: demos/wasm
         run: |
+          cd demos/wasm
           npm ci
           npx vite build
       
