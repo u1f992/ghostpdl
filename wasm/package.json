@@ -21,7 +21,7 @@
     "build:debug": "npm run build:wasm:debug && npm run build:typescript",
     "build:release": "npm run build:wasm:release && npm run build:typescript",
     "build": "npm run build:release",
-    "format": "prettier --write src/index.ts src/index.test.ts package.json prettier.config.js README.md tsconfig.json patch.js",
+    "format": "prettier --write src/index.ts src/index.test.ts src/worker.ts package.json prettier.config.js README.md tsconfig.json patch.js",
     "test": "node --test"
   },
   "repository": {
@@ -40,5 +40,8 @@
     "prettier": "^3.6.2",
     "shx": "^0.4.0",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "web-worker": "^1.5.0"
   }
 }

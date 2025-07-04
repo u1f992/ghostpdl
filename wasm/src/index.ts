@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Module from "./gs.js";
+import Worker from "web-worker";
 
 export type Options = {
   args: string[];
@@ -46,33 +46,36 @@ export async function gs({
   onStdout ??= () => {};
   onStderr ??= () => {};
 
-  let stdinOffset = 0;
-
-  const module = await Module({
-    preRun(mod: any) {
-      // https://emscripten.org/docs/api_reference/Filesystem-API.html#FS.init
-      mod.FS.init(
-        () => (stdinOffset < stdin.length ? stdin[stdinOffset++] : null),
-        onStdout,
-        onStderr,
-      );
-    },
+  const worker = new Worker(new URL("./worker.js", import.meta.url), {
+    type: "module",
   });
-
-  for (const [filePath, content] of Object.entries(inputFiles)) {
-    // @ts-ignore
-    module.FS.writeFile(filePath, content);
-  }
-
-  // https://github.com/emscripten-core/emscripten/pull/14865
-  // @ts-ignore
-  const exitCode: Result["exitCode"] = module.callMain(args);
-
-  const outputFiles: Result["outputFiles"] = {};
-  for (const filePath of outputFilePaths) {
-    // @ts-ignore
-    outputFiles[filePath] = module.FS.readFile(filePath);
-  }
-
-  return { exitCode, outputFiles };
+  return new Promise<Result>((resolve, reject) => {
+    worker.addEventListener("message", (e) => {
+      const data = e.data as
+        | { type: "stdout"; charCode: number | null }
+        | { type: "stderr"; charCode: number | null }
+        | { type: "complete"; result: Result };
+      if (data.type === "stdout") {
+        onStdout(data.charCode);
+      } else if (data.type === "stderr") {
+        onStderr(data.charCode);
+      } else if (data.type === "complete") {
+        worker.terminate();
+        resolve(data.result);
+      }
+    });
+    worker.addEventListener("error", (error) => {
+      worker.terminate();
+      reject(new Error(`Worker error: ${error.message}`));
+    });
+    worker.postMessage(
+      {
+        args,
+        stdin,
+        inputFiles,
+        outputFilePaths,
+      },
+      [stdin.buffer, ...Object.values(inputFiles).map((f) => f.buffer)],
+    );
+  });
 }
