@@ -44,7 +44,7 @@ jobs:
           cd wasm
           npm ci
           cd ../demos/wasm
-          npm ci
+          npm install
           npx vite build
       
       - name: Setup Pages
