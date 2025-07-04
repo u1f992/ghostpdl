@@ -54,7 +54,7 @@ export async function gs({
       mod.FS.init(
         () => (stdinOffset < stdin.length ? stdin[stdinOffset++] : null),
         onStdout,
-        onStderr
+        onStderr,
       );
     },
   });

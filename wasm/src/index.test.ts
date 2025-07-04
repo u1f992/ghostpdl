@@ -26,16 +26,25 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 await test("gs --version", async () => {
+  const outputChars: number[] = [];
   const ret = await gs({
     args: ["--version"],
+    onStdout: (charCode) => {
+      if (charCode !== null) {
+        outputChars.push(charCode);
+      }
+    },
   });
-  const log = new TextDecoder().decode(
-    new Uint8Array(ret.outputStreams.map(({ charCode }) => charCode)),
-  );
+  const log = new TextDecoder().decode(new Uint8Array(outputChars));
   assert.strictEqual(log, "10.05.1\n");
 });
 
 await test("gs -dNOPAUSE -dBATCH -sDEVICE=ps2write -sOutputFile=manuscript.ps manuscript.pdf", async () => {
+  const write = (charCode: number | null) => {
+    if (charCode !== null) {
+      process.stderr.write(new Uint8Array([charCode]));
+    }
+  };
   const ret = await gs({
     args: [
       "-dNOPAUSE",
@@ -49,6 +58,8 @@ await test("gs -dNOPAUSE -dBATCH -sDEVICE=ps2write -sOutputFile=manuscript.ps ma
         path.resolve(__dirname, "../asset/manuscript.pdf"),
       ),
     },
+    onStdout: write,
+    onStderr: write,
     outputFilePaths: ["manuscript.ps"],
   });
   assert.strictEqual(ret.exitCode, 0);
