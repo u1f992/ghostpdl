@@ -22,14 +22,12 @@ export type Options = {
   stdin: Uint8Array;
   inputFiles: Record<string, Uint8Array<ArrayBufferLike>>;
   outputFilePaths: string[];
+  onStdout?: (charCode: number | null) => void;
+  onStderr?: (charCode: number | null) => void;
 };
 
 export type Result = {
   exitCode: number;
-  outputStreams: {
-    src: "stdout" | "stderr";
-    charCode: number;
-  }[];
   outputFiles: Record<string, Uint8Array<ArrayBufferLike>>;
 };
 
@@ -38,13 +36,16 @@ export async function gs({
   stdin,
   inputFiles,
   outputFilePaths,
+  onStdout,
+  onStderr,
 }: Partial<Options>): Promise<Result> {
   args ??= [];
   stdin ??= new Uint8Array();
   inputFiles ??= {};
   outputFilePaths ??= [];
+  onStdout ??= () => {};
+  onStderr ??= () => {};
 
-  const outputStreams: Result["outputStreams"] = [];
   let stdinOffset = 0;
 
   const module = await Module({
@@ -52,14 +53,8 @@ export async function gs({
       // https://emscripten.org/docs/api_reference/Filesystem-API.html#FS.init
       mod.FS.init(
         () => (stdinOffset < stdin.length ? stdin[stdinOffset++] : null),
-        (charCode: number) => {
-          if (charCode !== null)
-            outputStreams.push({ src: "stdout", charCode });
-        },
-        (charCode: number) => {
-          if (charCode !== null)
-            outputStreams.push({ src: "stderr", charCode });
-        },
+        onStdout,
+        onStderr
       );
     },
   });
@@ -79,5 +74,5 @@ export async function gs({
     outputFiles[filePath] = module.FS.readFile(filePath);
   }
 
-  return { exitCode, outputStreams, outputFiles };
+  return { exitCode, outputFiles };
 }
