@@ -25,6 +25,12 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const writeToStderr = (charCode: number | null) => {
+  if (charCode !== null) {
+    process.stderr.write(new Uint8Array([charCode]));
+  }
+};
+
 await test("gs --version", async () => {
   const outputChars: number[] = [];
   const ret = await gs({
@@ -40,11 +46,6 @@ await test("gs --version", async () => {
 });
 
 await test("gs -dNOPAUSE -dBATCH -sDEVICE=ps2write -sOutputFile=manuscript.ps manuscript.pdf", async () => {
-  const write = (charCode: number | null) => {
-    if (charCode !== null) {
-      process.stderr.write(new Uint8Array([charCode]));
-    }
-  };
   const ret = await gs({
     args: [
       "-dNOPAUSE",
@@ -58,8 +59,8 @@ await test("gs -dNOPAUSE -dBATCH -sDEVICE=ps2write -sOutputFile=manuscript.ps ma
         path.resolve(__dirname, "../asset/manuscript.pdf"),
       ),
     },
-    onStdout: write,
-    onStderr: write,
+    onStdout: writeToStderr,
+    onStderr: writeToStderr,
     outputFilePaths: ["manuscript.ps"],
   });
   assert.strictEqual(ret.exitCode, 0);
@@ -68,5 +69,29 @@ await test("gs -dNOPAUSE -dBATCH -sDEVICE=ps2write -sOutputFile=manuscript.ps ma
   fs.writeFileSync(
     path.resolve(__dirname, "../asset/manuscript.ps"),
     ret.outputFiles["manuscript.ps"],
+  );
+});
+
+await test("gs -dNOPAUSE -dBATCH -sDEVICE=png16m -r150 -sOutputFile=manuscript.png -", async () => {
+  const ret = await gs({
+    args: [
+      "-dNOPAUSE",
+      "-dBATCH",
+      "-sDEVICE=png16m",
+      "-r150",
+      "-sOutputFile=manuscript.png",
+      "-",
+    ],
+    stdin: fs.readFileSync(path.resolve(__dirname, "../asset/manuscript.ps")),
+    onStdout: writeToStderr,
+    onStderr: writeToStderr,
+    outputFilePaths: ["manuscript.png"],
+  });
+  assert.strictEqual(ret.exitCode, 0);
+  assert.ok("manuscript.png" in ret.outputFiles);
+
+  fs.writeFileSync(
+    path.resolve(__dirname, "../asset/manuscript.png"),
+    ret.outputFiles["manuscript.png"],
   );
 });
