@@ -35,10 +35,15 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
+          cache-dependency-path: |
+            wasm/package-lock.json
+            demos/wasm/package-lock.json
       
       - name: Install dependencies and build
         run: |
-          cd demos/wasm
+          cd wasm
+          npm ci
+          cd ../demos/wasm
           npm ci
           npx vite build
       
