@@ -43,8 +43,9 @@ jobs:
         run: |
           cd wasm
           npm ci
+          npm run build
           cd ../demos/wasm
-          npm install
+          npm ci
           npx vite build
       
       - name: Setup Pages
