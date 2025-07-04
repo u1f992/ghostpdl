@@ -24,6 +24,7 @@ export type Options = {
   outputFilePaths: string[];
   onStdout?: (charCode: number | null) => void;
   onStderr?: (charCode: number | null) => void;
+  transfer?: Transferable[];
 };
 
 export type Result = {
@@ -38,6 +39,7 @@ export async function gs({
   outputFilePaths,
   onStdout,
   onStderr,
+  transfer,
 }: Partial<Options>): Promise<Result> {
   args ??= [];
   stdin ??= new Uint8Array();
@@ -45,6 +47,7 @@ export async function gs({
   outputFilePaths ??= [];
   onStdout ??= () => {};
   onStderr ??= () => {};
+  transfer ??= [];
 
   const worker = new Worker(new URL("./worker.js", import.meta.url), {
     type: "module",
@@ -75,7 +78,7 @@ export async function gs({
         inputFiles,
         outputFilePaths,
       },
-      [stdin.buffer, ...Object.values(inputFiles).map((f) => f.buffer)],
+      transfer,
     );
   });
 }

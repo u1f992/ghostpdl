@@ -46,6 +46,11 @@ await test("gs --version", async () => {
 });
 
 await test("gs -dNOPAUSE -dBATCH -sDEVICE=ps2write -sOutputFile=manuscript.ps manuscript.pdf", async () => {
+  const inputFiles = {
+    "manuscript.pdf": fs.readFileSync(
+      path.resolve(__dirname, "../asset/manuscript.pdf"),
+    ),
+  };
   const ret = await gs({
     args: [
       "-dNOPAUSE",
@@ -54,14 +59,11 @@ await test("gs -dNOPAUSE -dBATCH -sDEVICE=ps2write -sOutputFile=manuscript.ps ma
       "-sOutputFile=manuscript.ps",
       "manuscript.pdf",
     ],
-    inputFiles: {
-      "manuscript.pdf": fs.readFileSync(
-        path.resolve(__dirname, "../asset/manuscript.pdf"),
-      ),
-    },
+    inputFiles,
     onStdout: writeToStderr,
     onStderr: writeToStderr,
     outputFilePaths: ["manuscript.ps"],
+    transfer: Object.values(inputFiles).map((f) => f.buffer),
   });
   assert.strictEqual(ret.exitCode, 0);
   assert.ok("manuscript.ps" in ret.outputFiles);
@@ -73,6 +75,9 @@ await test("gs -dNOPAUSE -dBATCH -sDEVICE=ps2write -sOutputFile=manuscript.ps ma
 });
 
 await test("gs -dNOPAUSE -dBATCH -sDEVICE=png16m -r150 -sOutputFile=manuscript.png -", async () => {
+  const stdin = fs.readFileSync(
+    path.resolve(__dirname, "../asset/manuscript.ps"),
+  );
   const ret = await gs({
     args: [
       "-dNOPAUSE",
@@ -82,10 +87,11 @@ await test("gs -dNOPAUSE -dBATCH -sDEVICE=png16m -r150 -sOutputFile=manuscript.p
       "-sOutputFile=manuscript.png",
       "-",
     ],
-    stdin: fs.readFileSync(path.resolve(__dirname, "../asset/manuscript.ps")),
+    stdin,
     onStdout: writeToStderr,
     onStderr: writeToStderr,
     outputFilePaths: ["manuscript.png"],
+    transfer: [stdin.buffer],
   });
   assert.strictEqual(ret.exitCode, 0);
   assert.ok("manuscript.png" in ret.outputFiles);
